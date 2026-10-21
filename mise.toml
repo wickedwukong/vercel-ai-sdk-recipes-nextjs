@@ -1,0 +1,75 @@
+# Committed defaults first, then your gitignored secrets.
+[env]
+_.file = [".env.default", ".env.local"]
+
+# Bun installs and launches; Node runs the Next server.
+[tools]
+node = "24.22.1"
+bun = "1.4.3"
+
+# Write mise.lock, so every machine downloads the same tool builds.
+[settings]
+lockfile = true
+
+# Print how long each task took, and keep all of its output.
+[settings.task]
+timings = true
+
+# -- Dependencies -------------------------------------------------------------
+
+[tasks."deps:install"]
+description = "Install dependencies"
+run = "bun install"
+
+# -- Run ----------------------------------------------------------------------
+
+[tasks.dev]
+description = "Start the app on port 3000; the home page lists every recipe"
+depends = ["deps:install"]
+run = "bun run next dev -p 3000"
+
+[tasks.recipe]
+description = "Start the app and open one recipe in the browser (macOS)"
+depends = ["deps:install"]
+usage = 'arg "<name>" help="A recipe folder under app/"'
+run = '''
+if [ ! -d "app/${usage_name}" ]; then echo "No recipe named ${usage_name}" >&2; exit 1; fi
+(
+  for _ in $(seq 60); do
+    if curl -sf -o /dev/null http://localhost:3000/; then
+      open "http://localhost:3000/${usage_name}"
+      exit 0
+    fi
+    sleep 1
+  done
+  echo "The server did not answer on port 3000 within 60 seconds" >&2
+) &
+exec bun run next dev -p 3000
+'''
+
+# -- Code quality -------------------------------------------------------------
+
+[tasks.precommit]
+description = "Fix what can be fixed, then run every check. Run before each commit."
+depends = ["deps:install"]
+run = [{ task = "fix" }, { task = "check" }]
+
+[tasks.fix]
+description = "Format, sort imports and apply safe lint fixes"
+depends = ["deps:install"]
+run = "bun run biome check --write ."
+
+[tasks.check]
+description = "Run every check; never edits source files"
+depends = ["deps:install"]
+run = [{ task = "lint" }, { task = "typecheck" }]
+
+[tasks.lint]
+description = "Check formatting and lint with Biome"
+depends = ["deps:install"]
+run = "bun run biome check ."
+
+[tasks.typecheck]
+description = "Generate Next's route types, then type-check"
+depends = ["deps:install"]
+run = ["bun run next typegen", "bun run tsc --noEmit"]

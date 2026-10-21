@@ -1,0 +1,11 @@
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+bun-debug.log*
+.env.local
+.env.*.local
+mise.local.toml
+.DS_Store
+.idea/
+.vscode/
