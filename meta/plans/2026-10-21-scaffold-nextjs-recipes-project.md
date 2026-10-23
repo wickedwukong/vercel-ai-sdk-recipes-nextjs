@@ -207,14 +207,14 @@ or `tsc` fails, stop and report it. Don't change the code to silence it.
 
 #### Automated Verification:
 
-- [ ] `mise precommit` passes
-- [ ] **Diff check:** copy the untouched docs blocks into a scratch folder
+- [x] `mise precommit` passes
+- [x] **Diff check:** copy the untouched docs blocks into a scratch folder
   with this repo's `biome.jsonc`, and run `biome format --write` on them.
   Then diff each one against our file. The only differences allowed are:
   - the four changed lines
   - the moved import line, `@ai-sdk/openai`
   - the three `biome-ignore` lines
-- [ ] With the server running:
+- [x] With the server running:
   - `curl -s localhost:3000` contains `call-tools-multiple-steps`
   - `curl -s -o /dev/null -w '%{http_code}' localhost:3000/call-tools-multiple-steps`
     prints `200`
